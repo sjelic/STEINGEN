@@ -1,0 +1,19 @@
+version: '3'
+name: steingen
+services:
+  steingen:
+    build:
+      context: .
+      dockerfile: gcc.dockerfile
+    container_name: steingen
+    volumes:
+      - steingen-volume:/steingen
+      - .:/steingen
+      - /var/run/docker.sock:/var/run/docker.sock
+    # environment:
+    #   - NODE_ENV=development
+    user: root
+    command: sleep infinity
+
+volumes:
+  steingen-volume:

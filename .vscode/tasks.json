@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build Program",
+        "type": "shell",
+        "command": "make",
+        "args": [],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": ["$gcc"],
+        "detail": "Build the project using Makefile"
+      },
+      {
+        "label": "Clean Build",
+        "type": "shell",
+        "command": "make",
+        "args": ["clean"],
+        "group": "build",
+        "problemMatcher": []
+      }
+    ]
+  }
+  
