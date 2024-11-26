@@ -9,7 +9,8 @@
             "extensions": [
                 "ms-vscode.cpptools",
                 "ms-vscode.makefile-tools",
-                "george-alisson.html-preview-vscode"
+                "george-alisson.html-preview-vscode",
+                "ms-vscode.cpptools-extension-pack"
         ]
         }
     },

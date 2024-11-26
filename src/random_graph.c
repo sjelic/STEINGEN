@@ -29,13 +29,21 @@ unsigned int uv2index(unsigned int u, unsigned int v, unsigned int n) {
 
 int index2uv(unsigned int index, unsigned int n, int *u, int *v) {
     if (index < (n * (n - 1)) / 2) {
-        long long uu = (2 * n - 1 - sqrt((2 * n - 1) * (2 * n - 1) - 8 * index)) / 2;
+        long long nn = (long long)n;
+        long long indexx = (long long)index;
+        long long dd = (2 * nn - 1) * (2 * nn - 1) - 8 * indexx;
+        double uur = ((double)(2 * n - 1) - sqrt(dd)) / 2;
+        long long uu = ((double)(2 * n - 1) - sqrt(dd)) / 2;
         long long vv = uu + index + 1 - uu * (2*n - uu - 1) / 2;
         if (uu >= 0 && uu < n && vv >= uu + 1 && vv < n) {
             *u = (unsigned int)uu;
             *v = (unsigned int)vv;
             return 0;
         } else {
+            printf("n: %lld\n", nn);
+            printf("index: %lld\n", indexx);
+            printf("D: %lld\n", dd);
+            printf("u: %.10f\n", uur);
             fprintf(stderr, "Error: Invalid calculated u or v values. Index: %d, u = %lld, v=%lld\n", index, uu, vv);
             return -1;
         }

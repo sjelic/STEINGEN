@@ -3,7 +3,7 @@
 #include "random_graph.h"
 
 int main() {
-    unsigned int n = 60000, m = 150000, seed = 0;
+    unsigned int n = 5000, m = 10000, seed = 0;
     Edge *edges = malloc(m * sizeof(Edge));
     if (!edges) {
         fprintf(stderr, "Error: Memory allocation of EDGE array: edges FAILED.\n");
