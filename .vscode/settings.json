@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "random_graph.h": "c"
+        "random_graph.h": "c",
+        "random_groups.h": "c"
     }
 }

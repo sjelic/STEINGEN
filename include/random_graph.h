@@ -12,6 +12,7 @@ typedef struct Edge {
 } Edge;
 
 // Function prototypes
+int cmpInt(const void *a, const void *b);
 unsigned int uv2index(unsigned int u, unsigned int v, unsigned int n);
 unsigned int min(unsigned int u, unsigned int v);
 unsigned int max(unsigned int u, unsigned int v);
