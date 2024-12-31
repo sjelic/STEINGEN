@@ -1,38 +1,27 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include "random_graph.h"
-#include "random_groups.h"
+#include "random_group_steiner.h"
 
 int main() {
-    unsigned int n = 20, m = 80, k = 4, seed = 5;
-    Edge *edges = malloc(m * sizeof(Edge));
-    if (!edges) {
-        fprintf(stderr, "Error: Memory allocation of EDGE array: edges FAILED.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    random_spanning_tree(n, m, seed, edges);
-
-    printf("Generated graph edges:\n");
-    for (unsigned int i = 0; i < m; i++) {
-        printf("Edge %d -> %d\n", edges[i].src, edges[i].dest);
-    }
+    uint32_t n = 90000;       // Number of vertices
+    uint64_t m = 1000000;       // Number of edges
+    uint16_t k = 2000;       // Number of groups
+    uint16_t seed = 12345;
 
 
-    Group *groups;
-    generate_random_groups(n, k, &groups);
 
-    // Print groups
-    printf("Random groups:\n");
-    for (unsigned int i = 0; i < k; i++) {
-        printf("Group %u: ", i);
-        for (unsigned int j = 0; j < groups[i].size; j++) {
-            printf("%u ", groups[i].group[j]);
-        }
-        printf("\n");
-        free(groups[i].group); // Free each group's array
-    }
-    free(groups); // Free the groups array
-    free(edges);
+    const char *filename = "random_instance.stp";
+    float vertex_a = 1.0, vertex_b = 10.0;
+    const char *vertex_weight_type = "float";
+    float edge_a = 1.0, edge_b = 10.0;
+    const char *edge_weight_family = "random";
+    const char *edge_weight_type = "float";
+    const char *instance_type = "Node Weighted Group Steiner Tree Instance";
+
+    generate_random_group_steiner_instance(
+        n, m, k, filename,
+        vertex_a, vertex_b, vertex_weight_type,
+        edge_a, edge_b, edge_weight_family, edge_weight_type, instance_type, &seed);
+
+    printf("Random Group Steiner instance written to %s\n", filename);
     return 0;
 }

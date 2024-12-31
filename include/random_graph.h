@@ -4,20 +4,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
+#include "rand_large.h"
 
 // Edge structure
 typedef struct Edge {
-    int src;
-    int dest;
+    uint32_t src;
+    uint32_t dest;
 } Edge;
 
 // Function prototypes
 int cmpInt(const void *a, const void *b);
-unsigned int uv2index(unsigned int u, unsigned int v, unsigned int n);
-unsigned int min(unsigned int u, unsigned int v);
-unsigned int max(unsigned int u, unsigned int v);
-int index2uv(unsigned int index, unsigned int n, int *u, int *v);
-void random_spanning_tree(
-    unsigned int n, unsigned int m, unsigned int seed, Edge *edges);
+uint64_t uv2index(uint32_t u, uint32_t v, uint32_t n);
+uint32_t min(uint32_t u, uint32_t v);
+uint32_t max(uint32_t u, uint32_t v);
+int8_t index2uv(uint64_t index, uint32_t n, uint32_t *u, uint32_t *v);
+void random_connected_graph(
+    uint32_t n, uint64_t m, Edge *edges, uint16_t* seed);
 
 #endif // RANDOM_GRAPH_H

@@ -1,8 +1,8 @@
 # Compiler and Flags
 CC = gcc
-# CFLAGS = -Wall -Wextra -Iinclude -g -pg
-CFLAGS = -O2 -march=native -DNDEBUG -Wall -Wextra -Werror -Iinclude
-LDFLAGS = -lm
+CFLAGS = -Wall -Wextra -Iinclude -g -pg -O0
+# CFLAGS = -O3 -march=native -DNDEBUG -Wall -Wextra -Werror -Iinclude -s -flto -fno-math-errno
+LDFLAGS = -lm -flto
 
 # Directories
 SRC_DIR = src

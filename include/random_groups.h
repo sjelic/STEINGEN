@@ -3,14 +3,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 // Struct for representing groups
 typedef struct {
-    unsigned int *group; // Pointer to an array of group members
-    unsigned int size;   // Number of members in the group
+    uint32_t *group; // Pointer to an array of group members
+    uint32_t size;   // Number of members in the group
 } Group;
 
 // Function to generate random groups
-void generate_random_groups(unsigned int n, unsigned int k, Group **groups);
+void shuffle(uint32_t *array, uint32_t size, uint16_t* seed);
+void generate_random_groups(uint32_t n, uint16_t k, Group *groups, uint16_t* seed);
 
 #endif // RANDOM_GROUPS_H

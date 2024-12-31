@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "random_graph.h": "c",
-        "random_groups.h": "c"
+        "random_groups.h": "c",
+        "random_edge_weight.h": "c",
+        "rand_large.h": "c",
+        "stdint.h": "c",
+        "random_group_steiner.h": "c",
+        "random_vertex_weight.h": "c"
     }
 }
