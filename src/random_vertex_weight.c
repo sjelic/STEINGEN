@@ -6,15 +6,18 @@ float generate_random_vertex_weight(const char *weight_type, float a, float b, u
         fprintf(stderr, "Error: Lower bound 'a' cannot be greater than upper bound 'b'.\n");
         exit(EXIT_FAILURE);
     }
-    float random_value = 1 + a + ((float)rand_r((unsigned int* )seed) / RAND_MAX) * (b - a);
+    float random_value = a + ((float)rand_r((unsigned int* )seed) / RAND_MAX) * (b - a);
 
     // Check the weight type and cast appropriately
-    if (strcmp(weight_type, "integer") == 0) {
-        return (float)((int)random_value);
+    if (strcmp(weight_type, "int") == 0) {
+        if(random_value < 1.0)  random_value = 1.0;
+        random_value = (float)((int)random_value);
     } else if (strcmp(weight_type, "float") == 0) {
-        return random_value;
+        if(random_value < 1e-8) random_value = 1e-8;
     } else {
-        fprintf(stderr, "Error: Invalid weight type '%s'. Use 'integer' or 'float'.\n", weight_type);
+        fprintf(stderr, "Error: Invalid vertex weight type '%s'. Use 'int' or 'float'.\n", weight_type);
         exit(EXIT_FAILURE);
     }
+
+    return random_value;
 }

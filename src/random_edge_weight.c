@@ -19,29 +19,34 @@ float generate_random_edge_weight(float *x, float *y, unsigned int N, unsigned i
         exit(EXIT_FAILURE);
     }
 
-    float weight = 1.0;
+    float weight = 0.0;
 
-    if (strcmp(family, "euclid") == 0) {
+    if (strcmp(family, "EUCLID") == 0) {
         // Euclidean distance
         float dx = x[s] - x[t];
         float dy = y[s] - y[t];
         weight += sqrt(dx * dx + dy * dy);
-    } else if (strcmp(family, "grid") == 0) {
+    } else if (strcmp(family, "GRID") == 0) {
         // Manhattan distance
         weight += fabs(x[s] - x[t]) + fabs(y[s] - y[t]);
-    } else if (strcmp(family, "random") == 0) {
+    } else if (strcmp(family, "RANDOM") == 0) {
         // Uniform random weight
         weight += a + ((float)rand_r((unsigned int* )seed) / RAND_MAX) * (b - a);
     } else {
-        fprintf(stderr, "Error: Invalid weight type '%s'. Use 'euclid', 'grid', or 'random'.\n", family);
+        fprintf(stderr, "Error: Invalid edge weight family '%s'. Use 'EUCLID', 'GRID', or 'RANDOM'.\n", family);
         exit(EXIT_FAILURE);
     }
 
     // Cast to integer if the type is "int"
     if (strcmp(type, "int") == 0) {
         weight = (float)((int)weight);
-    } else if (strcmp(type, "float") != 0) {
-        fprintf(stderr, "Error: Invalid type '%s'. Use 'int' or 'float'.\n", type);
+        if(weight < 1.0)  weight = 1.0;
+    }
+    else if (strcmp(type, "float") == 0){
+        if(weight < 1e-8) weight = 1e-8;
+    }
+    else{
+        fprintf(stderr, "Error: Invalid edge weight type '%s'. Use 'int' or 'float'.\n", type);
         exit(EXIT_FAILURE);
     }
 

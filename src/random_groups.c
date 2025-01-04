@@ -1,5 +1,17 @@
 #include "random_groups.h"
 #include "random_graph.h"
+#include <string.h>
+
+
+
+int cmpGroups(const void *a, const void *b) {
+    uint32_t int_a = *(uint32_t *)a;
+    uint32_t int_b = *(uint32_t *)b;
+
+    // Return the difference (int_a - int_b)
+    return (int) ((int_a > int_b) - (int_a < int_b)); // Returns -1, 0, or 1
+}
+
 
 // Helper function to shuffle an array
 void shuffle(uint32_t *array, uint32_t size, uint16_t* seed) {
@@ -12,7 +24,7 @@ void shuffle(uint32_t *array, uint32_t size, uint16_t* seed) {
 }
 
 
-void generate_random_groups(uint32_t n, uint16_t k, Group *groups, uint16_t* seed) {
+void generate_random_groups(uint32_t n, uint16_t k, Group *groups, uint32_t* group_size, const char* group_size_mode, char* group_mode, uint16_t* seed) {
     if (k > n) {
         fprintf(stderr, "Error: Number of groups (k) cannot exceed the number of vertices (n).\n");
         exit(EXIT_FAILURE);
@@ -61,18 +73,68 @@ void generate_random_groups(uint32_t n, uint16_t k, Group *groups, uint16_t* see
         groups[i].group[groups[i].size++] = N[offset + i];
     }
 
-    uint32_t total = (n - offset) / k - 1;
-    for (uint32_t i = 0; i < k; i++) {
-        
-        shuffle(I,npool,seed);
-        for (uint32_t j = 0; j < total; j++) {            
-            groups[i].group[groups[i].size++] = N[offset + k + I[j]];
+
+
+    uint32_t total;
+
+    if(strcmp(group_size_mode, "auto") == 0){
+        total = (n - offset) / k - 1;
+        *group_size = total + 1;
+
+    }else if (strcmp(group_size_mode, "manual") == 0){
+
+        if (*group_size  >  n - offset - k ) {
+            fprintf(stderr, "Warning: Group size is shrinked to %d.\n", n - offset - k);
+            *group_size = n - offset - k;
         }
+        total = *group_size - 1;
+
+
+        if(strcmp(group_mode, "disjoint") == 0){
+            if ( *group_size > (n - offset) / k - 1){
+                snprintf(group_mode, 256, "overlap");
+                fprintf(stderr, "Warning: Groups cannot be disjoint, because group size is too large: %d. It has to be at most %d. Switched to overlapping instance.\n", *group_size, (n - offset) / k - 1);
+                
+            }
+        }
+
+
+    }else{
+        fprintf(stderr, "Error: Group size mode %s is not supported.\n", group_size_mode);
+        free(I);
+        free(N);
+        exit(EXIT_FAILURE);
     }
 
-    // Sort each group
+
+    if (strcmp(group_mode, "overlap") == 0){
+        for (uint32_t i = 0; i < k; i++) {
+            
+            shuffle(I,npool,seed);
+            for (uint32_t j = 0; j < total; j++) {            
+                groups[i].group[groups[i].size++] = N[offset + k + I[j]];
+            }
+        }
+    }
+    else if (strcmp(group_mode, "disjoint") == 0){
+        // shuffle(I,npool,seed);
+        for (uint32_t i = 0; i < k; i++) {
+            for (uint32_t j = 0; j < total; j++) {            
+                groups[i].group[groups[i].size++] = N[offset + k + i*total + I[j]];
+            }
+        }
+    }
+    else{
+        fprintf(stderr, "Error: Parameter 'group_mode' can be either 'overlap' or 'disjoint', but %s provided.\n", group_mode);
+        free(I);
+        free(N);
+        exit(EXIT_FAILURE);
+
+    }
+
+    //Sort each group
     for (uint32_t i = 0; i < k; i++) {
-        qsort(groups[i].group, groups[i].size, sizeof(uint32_t), cmpInt);
+        qsort(groups[i].group, groups[i].size, sizeof(uint32_t), cmpGroups);
     }
 
     // Clean up

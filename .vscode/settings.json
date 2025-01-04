@@ -6,6 +6,9 @@
         "rand_large.h": "c",
         "stdint.h": "c",
         "random_group_steiner.h": "c",
-        "random_vertex_weight.h": "c"
+        "random_vertex_weight.h": "c",
+        "getopt.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c"
     }
 }
