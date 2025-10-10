@@ -14,6 +14,15 @@ int cmpGroups(const void *a, const void *b) {
 
 
 // Helper function to shuffle an array
+/**
+ * @brief Shuffles the elements of an array of uint32_t in place.
+ *
+ * This function randomly permutes the elements of the given array using the provided seed.
+ *
+ * @param array Pointer to the array of uint32_t to be shuffled.
+ * @param size Number of elements in the array.
+ * @param seed Pointer to a uint16_t value used as the seed for randomization.
+ */
 void shuffle(uint32_t *array, uint32_t size, uint16_t* seed) {
     for (uint32_t i = size - 1; i > 0; i--) {
         uint32_t j = rand_r((unsigned int* )seed) % (i + 1);
@@ -24,6 +33,19 @@ void shuffle(uint32_t *array, uint32_t size, uint16_t* seed) {
 }
 
 
+/**
+ * @brief Generates random groups from a set of elements.
+ *
+ * This function divides `n` elements into `k` groups according to the specified modes.
+ *
+ * @param n Number of elements to be grouped.
+ * @param k Number of groups to generate.
+ * @param groups Pointer to an array of Group structures where the generated groups will be stored.
+ * @param group_size Pointer to an array where the size of each group will be stored.
+ * @param group_size_mode String specifying the mode for determining group sizes (e.g., "equal", "random").
+ * @param group_mode String specifying the grouping mode (e.g., "sequential", "random").
+ * @param seed Pointer to a seed value for random number generation.
+ */
 void generate_random_groups(uint32_t n, uint16_t k, Group *groups, uint32_t* group_size, const char* group_size_mode, char* group_mode, uint16_t* seed) {
     if (k > n) {
         fprintf(stderr, "Error: Number of groups (k) cannot exceed the number of vertices (n).\n");
