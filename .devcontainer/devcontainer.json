@@ -10,10 +10,15 @@
                 "ms-vscode.cpptools",
                 "ms-vscode.makefile-tools",
                 "george-alisson.html-preview-vscode",
-                "ms-vscode.cpptools-extension-pack"
-        ]
+                "ms-vscode.cpptools-extension-pack",
+                "github.copilot",
+                "james-yu.latex-workshop",
+                "GitHub.copilot",
+                "nickfode.latex-formatter",
+                "vivaxy.vscode-conventional-commits",
+                "mhutchie.git-graph"
+            ]
         }
     },
     "shutdownAction": "stopCompose"
-  }
-  
+}

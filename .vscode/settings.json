@@ -10,5 +10,105 @@
         "getopt.h": "c",
         "string.h": "c",
         "stdlib.h": "c"
-    }
+    },
+    "latex-workshop.docker.enabled": true,
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.docker.image.latex": "texlive/texlive",
+    "latex-workshop.latex.clean.subfolder.enabled": true,
+    "latex-workshop.latex.clean.fileTypes": [
+        "*.aux",
+        "*.bbl",
+        "*.blg",
+        "*.idx",
+        "*.ind",
+        "*.lof",
+        "*.log",
+        "*.lot",
+        "*.out",
+        "*.toc",
+        "*.acn",
+        "*.acr",
+        "*.alg",
+        "*.glg",
+        "*.glo",
+        "*.gls",
+        "*.fls",
+        "*.fdb_latexmk",
+        "*.synctex.gz",
+        "*.run.xml",
+        "*.bcf"
+    ],
+    "latex-workshop.latex.outDir": ".",
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk (Docker)",
+            "tools": ["latexmk"]
+        }
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "latexmk",
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--name",
+                "texlive",
+                "-v",
+                "D:/STEINGEN/docs:/workspace",
+                "-v",
+                "C:/Users/sjelic/texmf/bibtex/bib/Articles.bib:/workspace/Articles.bib",
+                "-w",
+                "/workspace",
+                "texlive/texlive",
+                "latexmk",
+                "-pdf",
+                "-synctex=1",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "pdflatex",
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--name",
+                "texlive",
+                "-v",
+                "D:/STEINGEN/docs:/workspace",
+                "-v",
+                "C:/Users/sjelic/texmf/bibtex/Articles.bib:/workspace/Articles.bib",
+                "-w",
+                "/workspace",
+                "texlive/texlive",
+                "pdflatex",
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "biber",
+            "command": "docker",
+            "args": [
+                "run",
+                "--rm",
+                "--name",
+                "texlive",
+                "-v",
+                "D:/STEINGEN/docs:/workspace",
+                "-w",
+                "/workspace",
+                "texlive/texlive",
+                "biber",
+                "--input-directory",
+                "/workspace",
+                "--output-directory",
+                "/workspace",
+                "%DOC%"
+            ]
+        }
+    ]
 }

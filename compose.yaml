@@ -10,9 +10,12 @@ services:
       - steingen-volume:/steingen
       - .:/steingen
       - /var/run/docker.sock:/var/run/docker.sock
+      - C:/Users/sjelic/texmf/bibtex/bib/Articles.bib:/steingen/docs/Articles.bib
     # environment:
     #   - NODE_ENV=development
     user: root
     command: sleep infinity
 volumes:
   steingen-volume:
+networks:
+  host:

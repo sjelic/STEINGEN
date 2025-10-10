@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     make \
     doxygen \
     valgrind \
-    && apt-get clean
+    docker.io
+RUN apt-get clean
 RUN ulimit -s unlimited
 # Set working directory within the container
 WORKDIR /steingen
