@@ -1,0 +1,292 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage[
+backend=biber
+]{biblatex}
+\usepackage{hyperref}
+
+\addbibresource{Articles.bib}
+\AtEveryBibitem{%
+    \clearfield{issn}%
+    \clearfield{isbn}%
+    \clearfield{urldate}%
+    \clearfield{url}%
+    \clearfield{note}%
+}
+
+
+
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {% \begin{breakablealgorithm}
+   \begin{center}
+     \refstepcounter{algorithm}% New algorithm
+     \hrule height.8pt depth0pt \kern2pt% \@fs@pre for \@fs@ruled
+     \renewcommand{\caption}[2][\relax]{% Make a new \caption
+       {\raggedright\textbf{\fname@algorithm~\thealgorithm} ##2\par}%
+       \ifx\relax##1\relax % #1 is \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+       \else % #1 is not \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+       \fi
+       \kern2pt\hrule\kern2pt
+     }
+  }{% \end{breakablealgorithm}
+     \kern2pt\hrule\relax% \@fs@post for \@fs@ruled
+   \end{center}
+  }
+\makeatother
+
+
+\begin{document}
+
+\section{Random Group Steiner Instances}
+
+
+We use algorithm described in \autocite{drorGeneralizedSpanningTrees2000,duinSolvingGroupSteiner2004a} for generating random group Steiner instances. The procedure consist of random connected graph generation, random groups generation and random weights generation. The only difference of this approach to the original one described in \autocite{drorGeneralizedSpanningTrees2000,duinSolvingGroupSteiner2004a} is that we additionally assign random weights to vertices.
+
+\section{Random Connected Graph Algorithm}
+
+
+
+
+Algorithm \ref{alg:uv2index} function \textsc{uv2index} that maps undirected edge  $\{u, v\}$, such that $0 \leq u < v < n$, to the integer index $i$ in the range $[0, n(n-1)/2 - 1]$. If we sort edges lexicographically for $n=5$ and enumerate them, we get the mapping shown in Table \ref{tab:edge_index_mapping}. Even more, the right column can be computed directly from the left column using the formula implemented in \textsc{uv2index}. For example, edge $(1,2)$ maps to index $5$ because there are $5$ edges that come before it lexicographically: $(0,0), (0,1), (0,2), (0,3), (0,4)$. Similarly, edge $(2,4)$ maps to index $8$ because there are $8$ edges that come before it lexicographically. Note that the mapping does not include self-loops and is designed for simple undirected graphs without multiple edges between the same pair of vertices. This mapping is bijective and ensures that every possible edge is assigned a distinct index, which is useful for edge permutation and efficient on-the-fly edge generation during random graph construction. 
+
+\begin{breakablealgorithm}
+\caption{uv2index}\label{alg:uv2index}
+\begin{algorithmic}[1]
+\Procedure{uv2index}{$u, v, n$}
+    \If{$v < n$ and $u < v$ and $u \geq 0$}
+        \State $e \gets \frac{u(2n - u - 1)}{2} + (v - u - 1)$
+        \State \Return $e$
+    \Else
+        \State \textbf{error} "Invalid vertices"
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Edge $(u, v)$ & Index $i$ \\
+\hline
+$(0, 0)$ & $0$ \\
+$(0, 1)$ & $1$ \\
+$(0, 2)$ & $2$ \\
+$(0, 3)$ & $3$ \\
+$(0, 4)$ & $4$ \\
+$(1, 2)$ & $5$ \\
+$(1, 3)$ & $6$ \\
+$(1, 4)$ & $7$ \\
+$(2, 4)$ & $8$ \\
+$(3, 4)$ & $9$ \\
+\hline
+\end{tabular}
+\caption{Mapping of edges to indices for $n=5$}\label{tab:edge_index_mapping}
+\end{table}
+
+In Algorithm \ref{alg:index2uv} the inverse of \textsc{uv2index} is implemented. Given an integer index in the range $[0, \frac{n(n-1)}{2} - 1]$, it returns the corresponding undirected edge $(u, v)$ such that $0 \leq u < v < n$. Actually, the mapping does not include self-loops and is designed for simple undirected graphs without multiple edges between the same pair of vertices. Now, left column can be computed directly from the right column using the formula implemented in \textsc{index2uv}. This allows for efficient retrieval of edge pairs from their indices, facilitating operations such as random edge selection and reconstruction of edge lists from permutations.
+
+\begin{breakablealgorithm}
+\caption{index2uv}\label{alg:index2uv}
+\begin{algorithmic}[1]
+\Procedure{index2uv}{$e, n$}
+    \State $d \gets (2n - 1)^2 - 8e$
+    \State $u \gets \left\lfloor \frac{2n - 1 - \sqrt{d}}{2} \right\rfloor$
+    \State $v \gets u + e + 1 - \frac{u(2n - u - 1)}{2}$
+    \If{$u$ and $v$ are valid}
+        \State \Return $(u, v)$
+    \Else
+        \State \textbf{error} "Invalid index"
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+
+
+
+Algorithm \ref{alg:rand_large} generates a large random integer using a seed value $s$. It obtains two random numbers ($r_1$ and $r_2$) from the seed, then combines them by multiplying $r_1$ by $2^31$ and adding $r_2$. This approach effectively concatenates two random values to produce a single large random number, which can be useful when a wider range of random values is needed than a single random number generator call provides.
+
+
+
+\begin{breakablealgorithm}
+\caption{rand\_large}\label{alg:rand_large}
+\begin{algorithmic}[1]
+\Procedure{rand\_large}{$s$}
+    \State $r_1 \gets$ random number using $s$
+    \State $r_2 \gets$ random number using $s$
+    \State \Return $r_1 \times 2^{31} + r_2$
+\EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+
+Algorithm \ref{alg:permuted} describes the \textsc{permuted} function, which efficiently computes a permutation of the set $\{0, 1, \dots, n-1\}$ using a bijective mapping defined by a large prime number $P$. For each input $i \in \{0,\ldots, n-1\}$, the function returns $P \cdot i \bmod n$. When $P$ is chosen such that it is coprime to $n$, this mapping is bijective, ensuring that every element in the range is mapped to a unique value. This technique is useful for generating random-like permutations deterministically and efficiently. This function is not source of the randomness and does not change the structure of the random graph created. The only reason it is used is to relabel vertices and edges which matters in later stages when random groups of vertices (i.e. subset of vertices) are generated.
+
+\begin{breakablealgorithm}
+\caption{permuted}\label{alg:permuted}
+\begin{algorithmic}[1]
+\Procedure{permuted}{$P, a, n$}
+    \State \Return $a \cdot P \bmod n$
+\EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+
+
+In the rest of this section, we use \textsc{Sort} to denote an efficient sorting algorithm (e.g., quicksort, mergesort) with average time complexity of $O(n \log n)$ for sorting $n$ elements. We use \textsc{binarySearch} to denote the standard binary search algorithm that checks for the existence of an element in a sorted array with time complexity of $O(\log n)$, where $n$ is the number of elements in the array. \textsc{Sort} and \textsc{binarySearch} are not provided since they rely on straightforward implementations.
+
+Algorithm \ref{alg:random_connected_graph} generates a random connected graph with $n$ vertices and $m$ edges through the following steps:
+
+\begin{enumerate}
+    \item \textbf{Spanning Tree Construction:} A random spanning tree is built by selecting $n-1$ edges. For each vertex $v$ from $1$ to $n-1$, the algorithm randomly connects $v$ to a previous vertex $u$ using a random number generator and a permutation for uniformity, ensuring the graph remains connected (lines \ref{line:start_for_v}--\ref{line:end_for_v}). The chosen edges are stored in array $T$ to facilitate efficient duplicate checking via binary search.
+    \item \textbf{Additional Edge Selection:} The remaining $m-n+1$ edges are selected from all possible edges, excluding those already present in the spanning tree. This is accomplished efficiently using binary search to avoid duplicates (lines \ref{line:start_for_e}--\ref{line:end_for_e}). 
+    \item \textbf{Edge Conversion:} The selected edge indices are then converted back to vertex pairs using the inverse mapping (lines \ref{line:start_for_i}--\ref{line:end_for_i}).
+\end{enumerate}
+
+This approach guarantees that the resulting graph is connected and that the edge selection is uniformly random and efficient.
+
+
+\begin{breakablealgorithm}
+\caption{RandomConnectedGraph}\label{alg:random_connected_graph}
+\begin{algorithmic}[1]
+\Procedure{RandomConnectedGraph}{$n, m, E, s$}
+    \State $T \gets$ allocate array of size $m$
+    \State $M \gets n(n-1)/2$ \Comment{Maximum edges in simple undirected graph}
+    \State $P \gets 5000000029$ \Comment{A prime number larger than $M$}
+    \If{$m > M$}
+        \State \textbf{error} "Number of edges exceeds maximum possible."
+        \State \textbf{exit}
+    \EndIf
+    \For{$v \gets 1$ to $n-1$} \Comment{Step 1: Build a spanning tree}\label{line:start_for_v}
+        \State $u \gets \Call{rand\_large}{s} \bmod v$
+        \State $\tilde{u} \gets \Call{permuted}{u, P, n}$
+        \State $\tilde{v} \gets \Call{permuted}{v, P, n}$
+        \State $e \gets \Call{uv2index}{\min(\tilde{u}, \tilde{v}), \max(\tilde{u}, \tilde{v}), n}$
+        \State $T[v-1] \gets e$
+    \EndFor
+    \State $\Call{Sort}{T[0 \dots n-2]}$\label{line:end_for_v}
+    \State $i \gets 0$ \Comment{Step 2: Add additional edges}\label{line:start_for_e}
+    \For{$e \gets 0$ to $M-1$}
+        \If{$i = m - n + 1$}
+            \State \textbf{break}
+        \EndIf
+        \State $\tilde{e} \gets \Call{permuted}{e, P, M}$
+        \If{$\Call{binarySearch}{T[0 \dots n-2], \tilde{e}}$}\label{line:binary_search}
+            \State \textbf{continue}
+        \EndIf
+        \State $T[n - 1 + i] \gets \tilde{e}$
+        \State $i \gets i + 1$
+    \EndFor\label{line:end_for_e}
+
+    \If{$i \neq m - n + 1$}
+        \State \textbf{error} "Could not generate required number of edges."
+        \State \textbf{exit}
+    \EndIf
+
+    \For{$i \gets 0$ to $m-1$}\Comment{Step 4: Convert edge indices to actual edges}\label{line:start_for_i}
+        \State $(u, v) \gets \Call{index2uv}{T[i], n}$
+
+        \State $E[i].src \gets u$
+        \State $E[i].dest \gets v$
+    \EndFor\label{line:end_for_i}
+
+    \State \text{Free memory for } $T$
+\EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+% In Algorithm \ref{alg:random_groups} we extend the procedure described in \autocite{drorGeneralizedSpanningTrees2000,duinSolvingGroupSteiner2004a} for generating random groups of vertices. We introduce additional parameters to control group size and overlap, enhancing flexibility in group formation.
+
+Algorithm \ref{alg:random_groups} describes the \textsc{RandomGroups} function, which generates $k$ groups from a set of $n$ vertices based on the following input parameters:
+
+\begin{itemize}
+    \item $n$: Total number of vertices.
+    \item $k$: Number of groups to create.
+    \item $g$: An array of $k$ groups, where each group is an array of vertex indices belonging to that group.
+    \item $\gamma$: Desired (but not guaranteed) group size (used if $\gamma_{\text{mode}}$ is "manual").
+    \item $\gamma_{\text{mode}}$: Mode for determining group size, either \texttt{auto} (size determined automatically) or \texttt{manual} (size specified by $\gamma$).
+    \item $g_{\text{mode}}$: Group mode, either \texttt{overlap} (vertices can belong to multiple groups) or \texttt{disjoint} (vertices belong to only one group).
+    \item $s$: Seed for random number generation to ensure reproducibility.
+\end{itemize}
+
+The function first shuffles the vertex indices to ensure randomness. It then determines the number of vertices to exclude from grouping ($\omega$) based on a random fraction $f$ of $n$. Since these vertices will not be assigned to any group, we designate them as Steiner vertices referring to the non-terminal vertices in Steiner tree instances. Each group is guaranteed to have at least one vertex (lines \ref{line:for_start_nonempty} - \ref{line:for_end_nonempty}), and the remaining vertices are distributed among the groups according to the specified group size mode (either \texttt{auto} or \texttt{manual}) and group mode (either \texttt{overlap} or \texttt{disjoint}). At line \ref{line:adjust_gamma} we adjust gamma not to exceeds the total number of unassigned vertices. Since the one vertex is already assigned to each group, it is required to assign aditional $\gamma - 1$ vertices to eaxh group. Line \ref{line:adjust_gamma} ensures that $\gamma - 1$ does not exceed the number of unassigned vertices $r$.
+
+If the group mode is \texttt{disjoint} and group size mode is \texttt{manual} and the specified group size exceeds the maximum possible size for disjoint groups, the function automatically switches to \texttt{overlap} group mode to ensure feasibility. If the group mode is \texttt{disjoint} but the group size mode is \texttt{auto}, the function calculates the maximum feasible group size that allows all groups to be formed without exceeding the number of available vertices. Otherwise, if the group mode is \texttt{overlap}, the function allows vertices to be shared among groups without restrictions regarding the group size mode. In any case, if the parameters are inconsistent (e.g., too many groups for the available vertices), the function raises an error and exits.
+
+
+The function ensures that the groups are sorted for consistency.
+
+\begin{breakablealgorithm}
+\caption{Procedure for generating random groups of vertices}\label{alg:random_groups}
+\begin{algorithmic}[1]
+    \Procedure{RandomGroups}{$n, k, g, \gamma, \gamma_{\text{mode}}, g_{\text{mode}}, s$}
+        \State $V \gets$ array $[0, 1, \dots, n-1]$ \Comment{vertex indices}
+        \State shuffle $V$ using seed $s$
+        \State $f \gets$ random float in $(0, 0.5)$ using seed $s$
+        \State $\omega \gets \lfloor f \cdot n \rfloor$
+        \If{$\omega + k > n$}
+            \State \textbf{error} "Too many groups for available vertices"
+            \State \textbf{exit}
+        \EndIf
+        \State $r \gets n - \omega - k$
+        \State $I \gets$ array $[0, 1, \dots, r-1]$
+        \For{$i \gets 0$ to $k-1$}\label{line:for_start_nonempty}
+            \State assign vertex $V[\omega + i]$ to $g[i]$ \Comment{Assign one vertex to each group skipping the first $\omega$ vertices}
+        \EndFor\label{line:for_end_nonempty}
+        \State $\gamma \gets \min\{\gamma - 1, r\}$ + 1\label{line:adjust_gamma}
+        \If{$\gamma \leq \lfloor \frac{r}{k} \rfloor + 1$}
+            \If{$\gamma_{\text{mode}}$ is \texttt{auto}}
+                \State $\sigma \gets \lfloor \frac{r}{k} \rfloor$
+            \ElsIf{$\gamma_{\text{mode}}$ is \texttt{manual}}
+                \State $\sigma \gets \gamma$
+            \Else
+                \State \textbf{error} "Unsupported group size mode"
+            \EndIf
+        \Else
+            \If{$g_{\text{mode}}$ is \texttt{disjoint}}
+                \State \textbf{error} "Group size too large for disjoint groups"
+                \State \textbf{exit}
+            \ElsIf{$g_{\text{mode}}$ is \texttt{overlap}}
+                \State $\sigma \gets \gamma$
+            \Else
+                \State \textbf{error} "Unsupported group mode"
+                \State \textbf{exit}            
+            \EndIf
+        \EndIf
+        \State $\tau \gets \sigma - 1$
+        \If{$g_{\text{mode}}$ is \texttt{overlap}}
+            \For{$i \gets 0$ to $k-1$}
+                \State shuffle $I$ using seed $s$
+                \For{$j \gets 0$ to $\tau-1$}
+                    \State assign vertex $V[\omega + k + I[j]]$ to $g[i]$
+                \EndFor
+            \EndFor
+        \ElsIf{$g_{\text{mode}}$ is \texttt{disjoint}}
+            \For{$i \gets 0$ to $k-1$}
+                \For{$j \gets 0$ to $\tau-1$}
+                    \State assign vertex $V[\omega + k + i \cdot \tau + I[j]]$ to $g[i]$
+                \EndFor
+            \EndFor
+        \Else
+            \State \textbf{error} "Unsupported group mode"
+            \State \textbf{exit}
+        \EndIf
+        \For{$i \gets 0$ to $k-1$}
+            \State \Call{Sort}{$g[i]$}
+        \EndFor
+    \EndProcedure
+\end{algorithmic}
+\end{breakablealgorithm}
+
+
+
+
+\printbibliography
+
+\end{document}
+
+
